@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colophon.example/schemas/declaration.schema.json",
+  "title": "Colophon Declaration",
+  "description": "The operator-authored source of truth for one agent: its owner, risk tier, and the tools it may call. See SPEC.md F1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "owner", "risk_tier", "autonomy_level", "tools", "sandbox"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "UUID v4 identifying this agent.",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The human or team accountable for this agent's behavior."
+    },
+    "description": {
+      "type": "string"
+    },
+    "risk_tier": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "autonomy_level": {
+      "type": "string",
+      "enum": ["assistive", "supervised", "delegated", "autonomous_bounded", "autonomous"]
+    },
+    "next_review": {
+      "type": "string",
+      "format": "date",
+      "description": "Date by which this Declaration must be re-reviewed. Propagates to the exported Card's classification.next_review."
+    },
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/toolGrant" }
+    },
+    "sandbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["write_paths"],
+      "properties": {
+        "write_paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "toolGrant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "data_access", "data_classes", "requires_approval"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The upstream MCP tool name this grant covers, e.g. 'fs.read'."
+        },
+        "data_access": {
+          "type": "string",
+          "enum": ["read", "write", "none"]
+        },
+        "data_classes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "requires_approval": {
+          "type": "boolean"
+        },
+        "max_scopes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "For auth.* tools: the maximum credential scopes this tool grant may request."
+        }
+      }
+    }
+  }
+}

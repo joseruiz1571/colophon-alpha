@@ -1,0 +1,32 @@
+# Evidence Collector — high risk tier, read-only.
+#
+# This agent is asked to produce read-only evidence reports about a fixed
+# set of repositories (branch-protection settings, repo metadata). It never
+# writes anything and never requests credential scopes beyond what is listed
+# here. Risk tier is "high" because it can read across an org's repository
+# settings, even though every individual grant is read-only.
+id: 3f2a9e10-6b7a-4b1a-9c9e-2b6a7f4d1a01
+name: evidence-collector
+owner: grc-engineering@example
+description: >
+  Produces read-only compliance evidence reports (branch protection, repo
+  settings) for a fixed, in-scope set of repositories. Never writes to disk
+  or the network, and never requests broader credential scopes.
+risk_tier: high
+autonomy_level: supervised
+next_review: 2027-03-01
+sandbox:
+  write_paths: []
+tools:
+  - name: repo.list
+    data_access: read
+    data_classes: [repo_metadata]
+    requires_approval: false
+  - name: repo.read_settings
+    data_access: read
+    data_classes: [repo_metadata, branch_protection]
+    requires_approval: false
+  - name: fs.read
+    data_access: read
+    data_classes: [local_fixture]
+    requires_approval: false

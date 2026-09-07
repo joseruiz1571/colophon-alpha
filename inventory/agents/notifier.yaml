@@ -1,0 +1,21 @@
+# Notifier — low risk tier, one write-capable tool that requires approval.
+#
+# This agent may write a short status file into its sandbox directory, but
+# every write is escalated for human approval before it executes (C16/C17).
+id: 8c1d4f22-0a3e-4c77-b6a1-5e9f2d7c3b02
+name: notifier
+owner: grc-engineering@example
+description: >
+  Writes a short status note into its sandbox directory after a run. Every
+  write requires an operator-approved fingerprint before it executes.
+risk_tier: low
+autonomy_level: assistive
+next_review: 2027-03-01
+sandbox:
+  write_paths:
+    - "fixtures/sandbox/notifier/**"
+tools:
+  - name: fs.write
+    data_access: write
+    data_classes: [local_fixture]
+    requires_approval: true

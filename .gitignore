@@ -1,0 +1,8 @@
+node_modules/
+out/
+trace/*.jsonl
+*.log
+cosign.key
+cosign.pub
+.DS_Store
+bun.lockb

@@ -1,0 +1,12 @@
+# Fixture for C1: a Declaration missing the required 'owner' field.
+id: 00000000-0000-4000-8000-000000000099
+name: broken-agent
+risk_tier: low
+autonomy_level: assistive
+sandbox:
+  write_paths: []
+tools:
+  - name: fs.read
+    data_access: read
+    data_classes: [local_fixture]
+    requires_approval: false
