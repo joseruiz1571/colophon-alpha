@@ -1,0 +1,22 @@
+title = "colophon gitleaks config"
+
+# Extend gitleaks' own default rule set rather than replacing it — we only
+# want to narrow *where* it looks, never weaken *what* it looks for.
+[extend]
+useDefault = true
+
+[allowlist]
+description = '''
+Ephemeral Cosign signing keypairs generated fresh by `bun run demo` under
+out/demo/<run-id>/keys/. These are not a leaked secret: a new keypair is
+generated locally on every demo run (src/demo/run.ts), the private key is
+password-protected (COSIGN_PASSWORD, itself generated fresh per run and
+never committed), out/ is gitignored so the key is never committed, and
+the key lives beside — not inside — the trace/evidence/report/bundle
+artifacts that A2 (SPEC.md) actually requires to be free of credential
+values. Everything else on disk, including those trace/evidence/report/
+bundle artifacts themselves and all committed source, is still scanned.
+'''
+paths = [
+  '''out/demo/[^/]+/keys/.*''',
+]
