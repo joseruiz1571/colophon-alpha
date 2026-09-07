@@ -136,4 +136,19 @@ jobs:
 
       # ---- 10. secret scan ----
       - name: secret scan
-        run: gitleaks detect --no-git -v --source .
+        run: |
+          set +e
+          gitleaks detect --no-git -v --report-format json --report-path /tmp/gitleaks-report.json --source .
+          code=$?
+          set -e
+          if [ "$code" -ne 0 ]; then
+            echo "::group::gitleaks report (diagnostic dump)"
+            cat /tmp/gitleaks-report.json || echo "(no report file written)"
+            echo "::endgroup::"
+            if [ -s /tmp/gitleaks-report.json ] && [ "$(cat /tmp/gitleaks-report.json)" != "[]" ]; then
+              jq -r '.[] | "::error::gitleaks: rule=" + (.RuleID // "?") + " file=" + (.File // "?") + " line=" + ((.StartLine // 0) | tostring) + " match=" + ((.Match // "")[0:120])' /tmp/gitleaks-report.json
+            else
+              echo "::error::gitleaks exited $code with an empty/no report — likely a config or invocation error, not a leak finding"
+            fi
+            exit "$code"
+          fi
