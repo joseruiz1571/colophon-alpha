@@ -1,0 +1,102 @@
+# Colophon control set (SPEC.md C34/C35).
+#
+# Each control names a deterministic check the report engine evaluates over
+# the evidence collected in one run (src/report/checks.ts, keyed by `check`).
+# This file is a bare top-level YAML sequence — not wrapped in a `controls:`
+# key — because SPEC.md's own probe for C34 is `grep -c '^- id:'
+# controls/agent-controls.yaml`, which only matches a list item at column 0.
+#
+# framework_refs point at real framework identifiers where one exists
+# (NIST AI RMF functions/categories, ISO/IEC 42001 clauses) and at the
+# nearest named item where the framework is coarser (OWASP LLM Top 10,
+# MITRE ATLAS) — see DECISIONS.md, F7, for how each ref was chosen.
+
+- id: no-outside-calls
+  framework_refs:
+    - framework: NIST-AI-RMF
+      ref: MANAGE-4.1
+    - framework: OWASP-LLM-Top-10
+      ref: LLM06-Excessive-Agency
+  intent: >-
+    No tool call outside the Agent Card's declared tools[] is ever executed
+    (allowed) by the gate; every call the Card did not grant stays refused,
+    however the agent's driver behaves.
+  check: no-outside-calls
+
+- id: sandbox-write-boundary
+  framework_refs:
+    - framework: NIST-AI-RMF
+      ref: MANAGE-2.3
+    - framework: ISO/IEC-42001
+      ref: "8.3"
+  intent: >-
+    No executed write lands outside the paths the Card's sandbox.write_paths
+    grants; a write tool's path argument is checked against every declared
+    pattern before the call is allowed.
+  check: sandbox-write-boundary
+
+- id: no-scope-expansion
+  framework_refs:
+    - framework: NIST-AI-RMF
+      ref: GOVERN-1.1
+    - framework: MITRE-ATLAS
+      ref: AML.T0012
+  intent: >-
+    No executed credential-scope request (the auth.* tool family) is ever
+    granted scopes beyond the tool's declared max_scopes on the Card.
+  check: no-scope-expansion
+
+- id: every-deny-has-rule-id
+  framework_refs:
+    - framework: ISO/IEC-42001
+      ref: "9.1"
+  intent: >-
+    Every deny or escalate decision in the trace carries at least one
+    rule_id, so a refusal can always be traced back to the policy rule
+    that produced it, never to an unexplained blanket denial.
+  check: every-deny-has-rule-id
+
+- id: trace-chain-intact
+  framework_refs:
+    - framework: NIST-AI-RMF
+      ref: MEASURE-2.7
+  intent: >-
+    The session's hash chain verifies end to end: no line's hash or
+    prev_hash linkage has been altered since the gate appended it.
+  check: trace-chain-intact
+
+- id: card-not-stale
+  framework_refs:
+    - framework: ISO/IEC-42001
+      ref: "8.2"
+  intent: >-
+    The Agent Card that governed this session's decisions has not passed
+    its classification.next_review date.
+  check: card-not-stale
+
+- id: approval-required-enforced
+  framework_refs:
+    - framework: NIST-AI-RMF
+      ref: GOVERN-1.1
+    - framework: OWASP-LLM-Top-10
+      ref: LLM06-Excessive-Agency
+  intent: >-
+    Every executed call to a tool marked requires_approval on the Card
+    carries a matching, on-file approval fingerprint (GATE-APPROVED); none
+    ran on an escalation that was never approved.
+  check: approval-required-enforced
+
+- id: bundle-manifest-complete
+  framework_refs:
+    - framework: ISO/IEC-42001
+      ref: "7.5"
+  intent: >-
+    The evidence set this report is built on is internally consistent and
+    complete: the trace summary's decision count matches the individual
+    decision items collected, and the Card that governed the session is
+    itself retrievable as evidence. This is a report-time proxy for the
+    eventual bundle manifest's completeness (SPEC.md F8) — the real
+    manifest does not exist until `colophon bundle` runs; `colophon bundle
+    verify` is the independent, file-hash-based check of it. See
+    DECISIONS.md, F7.
+  check: bundle-manifest-complete
