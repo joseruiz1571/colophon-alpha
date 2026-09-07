@@ -34,15 +34,25 @@ jobs:
           opa version
 
       - name: Set up Cosign
-        uses: sigstore/cosign-installer@v3
+        # The floating `@v3` tag on this action resolves to a stale,
+        # never-forwarded commit (verified: its action.yml bootstraps from
+        # cosign v2.5.2 and only knows how to verify a target cosign
+        # release via an old-style detached `<file>.sig`). Every cosign
+        # v3.x release ships signatures only as `<file>.sigstore.json`
+        # keyless bundles (confirmed: `cosign-linux-amd64.sig` 404s on the
+        # v3.1.1 release, `cosign-linux-amd64.sigstore.json` exists) — so
+        # `@v3` can never install any cosign v3.x binary and fails at this
+        # step with curl exit 22 before cosign is even on PATH. Pinning
+        # the *installer action itself* to a real, current release
+        # (v4.1.2) that has `.sigstore.json` support fixes it; the
+        # `cosign-release` input below then selects the actual cosign
+        # binary version we run everywhere else in this workflow.
+        uses: sigstore/cosign-installer@v4.1.2
         with:
-          # Pinned to a real v3.x release (this repo's offline
+          # A real v3.x cosign release (this repo's offline
           # signing-config workaround — fixtures/cosign/offline-signing-config.json,
           # DECISIONS.md F8 — needs the --signing-config/--bundle flags
-          # that only exist from cosign v3 onward). v3.1.3 does not exist
-          # as an actual sigstore/cosign release (confirmed: the installer
-          # failed with exit 22 trying to fetch it) — v3.1.1 is the real
-          # latest v3 release as of this writing.
+          # that only exist from cosign v3 onward).
           cosign-release: "v3.1.1"
 
       - name: Set up gitleaks
