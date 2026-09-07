@@ -7,16 +7,25 @@ useDefault = true
 
 [allowlist]
 description = '''
-Ephemeral Cosign signing keypairs generated fresh by `bun run demo` under
-out/demo/<run-id>/keys/. These are not a leaked secret: a new keypair is
-generated locally on every demo run (src/demo/run.ts), the private key is
-password-protected (COSIGN_PASSWORD, itself generated fresh per run and
-never committed), out/ is gitignored so the key is never committed, and
-the key lives beside — not inside — the trace/evidence/report/bundle
+Ephemeral Cosign signing keypairs generated fresh by two things that
+regenerate them on every run and never commit them: `bun run demo`
+(src/demo/run.ts, under out/demo/<run-id>/keys/) and `bun test`
+(test/bundle.test.ts, under test/tmp-bundle/signed-keys/ and
+test/tmp-bundle/signed-tampered-keys/, generated to exercise real
+cosign sign/verify — confirmed the real CI leak: `--no-git` scans the
+actual filesystem regardless of .gitignore, so these test-generated
+keys are on disk by the time the later "secret scan" step runs, same
+as the demo's). None of these are a leaked secret: each is
+password-protected (a throwaway COSIGN_PASSWORD, fresh or hardcoded
+test-only per call, never committed), the containing directories
+(out/, test/tmp-*/) are gitignored so the keys are never committed,
+and they live beside — not inside — the trace/evidence/report/bundle
 artifacts that A2 (SPEC.md) actually requires to be free of credential
 values. Everything else on disk, including those trace/evidence/report/
 bundle artifacts themselves and all committed source, is still scanned.
 '''
 paths = [
   '''out/demo/[^/]+/keys/.*''',
+  '''test/tmp-bundle/signed-keys/.*''',
+  '''test/tmp-bundle/signed-tampered-keys/.*''',
 ]
