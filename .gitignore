@@ -1,6 +1,7 @@
 node_modules/
 out/
 trace/*.jsonl
+test/tmp-*/
 *.log
 cosign.key
 cosign.pub
