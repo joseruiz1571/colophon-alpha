@@ -1,0 +1,20 @@
+{
+  "card": {
+    "tools": [
+      {
+        "name": "auth.request_scopes",
+        "data_access": "none",
+        "data_classes": [],
+        "requires_approval": false,
+        "max_scopes": ["repo:read"]
+      }
+    ],
+    "sandbox": { "write_paths": [] }
+  },
+  "call": {
+    "name": "auth.request_scopes",
+    "arguments": { "scopes": ["admin:org"] },
+    "fingerprint": "fixture-scope-expansion-01"
+  },
+  "context": { "session_id": "fixture", "call_index": 0, "prior_decisions": [], "approvals": [] }
+}

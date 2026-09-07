@@ -1,0 +1,19 @@
+{
+  "card": {
+    "tools": [
+      {
+        "name": "repo.read_settings",
+        "data_access": "read",
+        "data_classes": ["repo_metadata:colophon-demo-a", "branch_protection:colophon-demo-a"],
+        "requires_approval": false
+      }
+    ],
+    "sandbox": { "write_paths": [] }
+  },
+  "call": {
+    "name": "repo.read_settings",
+    "arguments": { "repo": "colophon-demo-c", "data_class": "branch_protection:colophon-demo-c" },
+    "fingerprint": "fixture-data-class-violation-01"
+  },
+  "context": { "session_id": "fixture", "call_index": 0, "prior_decisions": [], "approvals": [] }
+}

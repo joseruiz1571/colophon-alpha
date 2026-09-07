@@ -1,0 +1,14 @@
+{
+  "card": {
+    "tools": [
+      { "name": "repo.list", "data_access": "read", "data_classes": ["repo_metadata"], "requires_approval": false }
+    ],
+    "sandbox": { "write_paths": [] }
+  },
+  "call": {
+    "name": "mail.send",
+    "arguments": { "to": "someone@example", "body": "hi" },
+    "fingerprint": "fixture-unknown-tool-01"
+  },
+  "context": { "session_id": "fixture", "call_index": 0, "prior_decisions": [], "approvals": [] }
+}

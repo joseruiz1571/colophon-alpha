@@ -1,0 +1,14 @@
+{
+  "card": {
+    "tools": [
+      { "name": "fs.write", "data_access": "write", "data_classes": ["local_fixture"], "requires_approval": true }
+    ],
+    "sandbox": { "write_paths": ["fixtures/sandbox/notifier/**"] }
+  },
+  "call": {
+    "name": "fs.write",
+    "arguments": { "path": "fixtures/sandbox/notifier/status.json", "data_class": "local_fixture" },
+    "fingerprint": "fixture-needs-approval-01"
+  },
+  "context": { "session_id": "fixture", "call_index": 0, "prior_decisions": [], "approvals": [] }
+}
