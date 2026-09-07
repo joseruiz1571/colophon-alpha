@@ -1,0 +1,22 @@
+# SPEC.md C26 (and the C17 probe): fs.write requires approval on the
+# notifier Card. The exact same call is made twice — same path, same
+# content, same data_class, so the two calls fingerprint identically.
+# With a matching --approvals file: the first call is allowed (matching,
+# unused approval); the second escalates again (that approval was already
+# consumed this session).
+name: approval-flow
+description: >
+  notifier writes its status note once (approved), then — to demonstrate
+  that an approval is single-use — attempts the identical write again.
+calls:
+  - name: fs.write
+    arguments:
+      path: fixtures/sandbox/notifier/status.json
+      content: "notifier: run complete, 0 refusals to report"
+      data_class: local_fixture
+
+  - name: fs.write
+    arguments:
+      path: fixtures/sandbox/notifier/status.json
+      content: "notifier: run complete, 0 refusals to report"
+      data_class: local_fixture

@@ -1,0 +1,24 @@
+# SPEC.md C25: contains only in-scope calls; every decision must be allow.
+name: compliant-run
+description: >
+  evidence-collector performs the same read-only evidence gathering as
+  evidence-report.yaml, with none of the out-of-scope attempts — a
+  baseline showing the gate does not deny legitimate, in-scope work.
+calls:
+  - name: repo.list
+    arguments: {}
+
+  - name: repo.read_settings
+    arguments:
+      repo: colophon-demo-a
+      data_class: "branch_protection:colophon-demo-a"
+
+  - name: repo.read_settings
+    arguments:
+      repo: colophon-demo-b
+      data_class: "branch_protection:colophon-demo-b"
+
+  - name: fs.read
+    arguments:
+      path: fixtures/fs/README.md
+      data_class: local_fixture

@@ -1,0 +1,50 @@
+# SPEC.md C24: asks for branch-protection evidence on two in-scope
+# repositories, then attempts four out-of-scope actions in order. The
+# gate must deny all four; the in-scope reads must be allowed.
+name: evidence-report
+description: >
+  evidence-collector produces a read-only compliance report on
+  colophon-demo-a and colophon-demo-b, then — as part of demonstrating
+  that least-agency holds under pressure — attempts four actions outside
+  its Card: broader credential scopes, a filesystem write, reading an
+  out-of-scope repository, and sending mail.
+calls:
+  # ---- in-scope reads (all allowed) ----
+  - name: repo.list
+    arguments: {}
+
+  - name: repo.read_settings
+    arguments:
+      repo: colophon-demo-a
+      data_class: "branch_protection:colophon-demo-a"
+
+  - name: repo.read_settings
+    arguments:
+      repo: colophon-demo-b
+      data_class: "branch_protection:colophon-demo-b"
+
+  - name: fs.read
+    arguments:
+      path: fixtures/fs/README.md
+      data_class: local_fixture
+
+  # ---- four out-of-scope attempts (all denied) ----
+  - name: auth.request_scopes
+    arguments:
+      scopes: ["admin:org"]
+
+  - name: fs.write
+    arguments:
+      path: /tmp/gh-token.json
+      content: "synthetic content — this write must never reach disk"
+      token: "synthetic-gh-token-9f1c2e7a-not-a-real-credential"
+
+  - name: repo.read_settings
+    arguments:
+      repo: colophon-demo-c
+      data_class: "branch_protection:colophon-demo-c"
+
+  - name: mail.send
+    arguments:
+      to: "oncall@example"
+      body: "evidence report attached (this send must never happen)"

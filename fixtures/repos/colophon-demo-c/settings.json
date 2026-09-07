@@ -1,0 +1,12 @@
+{
+  "repo": "colophon-demo-c",
+  "visibility": "private",
+  "default_branch": "main",
+  "branch_protection": {
+    "main": {
+      "required_reviews": 0,
+      "required_status_checks": [],
+      "enforce_admins": false
+    }
+  }
+}
