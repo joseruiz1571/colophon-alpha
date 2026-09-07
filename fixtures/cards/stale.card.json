@@ -1,0 +1,101 @@
+{
+  "spec_version": "1.0.0",
+  "card_type": "agent",
+  "metadata": {
+    "id": "3f2a9e10-6b7a-4b1a-9c9e-2b6a7f4d1a01",
+    "name": "evidence-collector",
+    "owner": "grc-engineering@example",
+    "created_at": "2026-09-07T20:55:13.814Z",
+    "canonical_sha256": "430ebaaea9098f466b19af7f0750f96d4f1da768859fe6fbcfdf78813f1ebf92"
+  },
+  "classification": {
+    "risk_tier": "high",
+    "next_review": "2020-01-01"
+  },
+  "autonomy": {
+    "level": "supervised"
+  },
+  "tools": [
+    {
+      "name": "repo.list",
+      "data_access": "read",
+      "data_classes": [
+        "repo_metadata"
+      ],
+      "requires_approval": false
+    },
+    {
+      "name": "repo.read_settings",
+      "data_access": "read",
+      "data_classes": [
+        "repo_metadata",
+        "branch_protection"
+      ],
+      "requires_approval": false
+    },
+    {
+      "name": "fs.read",
+      "data_access": "read",
+      "data_classes": [
+        "local_fixture"
+      ],
+      "requires_approval": false
+    }
+  ],
+  "sandbox": {
+    "write_paths": []
+  },
+  "decision_boundaries": [
+    {
+      "type": "tool_scope",
+      "description": "may call 'repo.list' with 'read' data access"
+    },
+    {
+      "type": "tool_scope",
+      "description": "may call 'repo.read_settings' with 'read' data access"
+    },
+    {
+      "type": "tool_scope",
+      "description": "may call 'fs.read' with 'read' data access"
+    },
+    {
+      "type": "data_class",
+      "description": "may touch data class 'branch_protection'"
+    },
+    {
+      "type": "data_class",
+      "description": "may touch data class 'local_fixture'"
+    },
+    {
+      "type": "data_class",
+      "description": "may touch data class 'repo_metadata'"
+    },
+    {
+      "type": "sandbox_path",
+      "description": "no filesystem write paths granted"
+    }
+  ],
+  "escalation": {
+    "kill_switch": {
+      "available": true,
+      "mechanism": "operator revokes by deleting or invalidating the Card file passed to --card; the gate re-validates the Card at every startup and fails every call closed if it is missing or invalid"
+    }
+  },
+  "governance": {
+    "control_mappings": [
+      {
+        "framework": "NIST-AI-RMF",
+        "ref": "GOVERN-1.1"
+      },
+      {
+        "framework": "NIST-AI-RMF",
+        "ref": "MANAGE-2.3"
+      },
+      {
+        "framework": "ISO/IEC-42001",
+        "ref": "8.3"
+      }
+    ]
+  },
+  "evidence": []
+}

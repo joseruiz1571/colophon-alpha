@@ -1,0 +1,71 @@
+{
+  "spec_version": "1.0.0",
+  "card_type": "agent",
+  "metadata": {
+    "id": "8c1d4f22-0a3e-4c77-b6a1-5e9f2d7c3b02",
+    "name": "notifier",
+    "owner": "grc-engineering@example",
+    "created_at": "2026-09-07T20:55:14.159Z",
+    "canonical_sha256": "c9a13250cc637f66f4ba845163cd473a844bd7200a86a20e0c4dc427e22f026b"
+  },
+  "classification": {
+    "risk_tier": "low",
+    "next_review": "2027-03-01"
+  },
+  "autonomy": {
+    "level": "assistive"
+  },
+  "tools": [
+    {
+      "name": "fs.write",
+      "data_access": "write",
+      "data_classes": [
+        "local_fixture"
+      ],
+      "requires_approval": true
+    }
+  ],
+  "sandbox": {
+    "write_paths": [
+      "fixtures/sandbox/notifier/**"
+    ]
+  },
+  "decision_boundaries": [
+    {
+      "type": "tool_scope",
+      "description": "may call 'fs.write' with 'write' data access",
+      "detail": "requires_approval"
+    },
+    {
+      "type": "data_class",
+      "description": "may touch data class 'local_fixture'"
+    },
+    {
+      "type": "sandbox_path",
+      "description": "may write only under 'fixtures/sandbox/notifier/**'"
+    }
+  ],
+  "escalation": {
+    "kill_switch": {
+      "available": true,
+      "mechanism": "operator revokes by deleting or invalidating the Card file passed to --card; the gate re-validates the Card at every startup and fails every call closed if it is missing or invalid"
+    }
+  },
+  "governance": {
+    "control_mappings": [
+      {
+        "framework": "NIST-AI-RMF",
+        "ref": "GOVERN-1.1"
+      },
+      {
+        "framework": "NIST-AI-RMF",
+        "ref": "MANAGE-2.3"
+      },
+      {
+        "framework": "ISO/IEC-42001",
+        "ref": "8.3"
+      }
+    ]
+  },
+  "evidence": []
+}

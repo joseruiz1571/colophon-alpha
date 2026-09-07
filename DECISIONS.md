@@ -23,7 +23,19 @@ Format: one entry per decision, newest at the bottom of its feature section.
 
 ## F1 · Declare
 
-(decisions added as this feature is built)
+- **Fail-closed loading**: `loadDeclaration` never throws for a missing file, malformed YAML, or a schema violation — all three surface as `{ valid: false, errors }`. This mirrors the gate's own fail-closed rule (Principle 2) one layer up: nothing downstream should have to distinguish "the Declaration was invalid" from "the Declaration couldn't be read" or "the Declaration wasn't there".
+- **`tools[].max_scopes`**: added as an optional field beyond C2's minimum, to give `auth.*` tool grants a place to declare the credential scopes they may request (consumed by the C15 gate rule and by Card `decision_boundaries`).
+
+## F2 · Card
+
+- **OSCAL/JSON-Schema draft mismatch**: see the dedicated section above (added while vendoring the schema, before Card-proper was built).
+- **`classification.next_review` default when the Declaration omits it**: the Declaration schema does not require `next_review` (C2's required list), but the Card schema does (C6). `card export` fills a default of today + 60/90/180/365 days for critical/high/medium/low risk tiers respectively when the Declaration doesn't specify one. Both shipped Declarations specify `next_review` explicitly, so this default only matters for future Declarations that omit it.
+- **`metadata.id` pattern**: the Card schema requires a UUID *v4* pattern (matching the Declaration schema), not just "any UUID shape". This means C9's "all-zero UUID is invalid" requirement falls directly out of ordinary schema validation — no separate semantic check was needed in `card validate` beyond running the schema.
+- **`decision_boundaries[]` derivation**: built deterministically from the Declaration: one `tool_scope` entry per tool grant, one `data_class` entry per unique data class across all tools, one `sandbox_path` entry per write path (or a single "no write paths granted" entry when the sandbox is empty), and one `credential_scope` entry per tool that declares `max_scopes`. This array is documentation for auditors; it is not itself read by the gate's policy, which reads `card.tools[]` directly (see F3).
+- **`governance.control_mappings[]`**: populated with a small fixed baseline (NIST AI RMF GOVERN-1.1 / MANAGE-2.3, ISO/IEC 42001 §8.3) describing what having *any* Card with enforced tool/data/sandbox boundaries demonstrates. This is informative metadata on the Card itself, independent of the per-run control evaluation in F7 (`controls/agent-controls.yaml`), which is evaluated against evidence from a specific session, not against the Card in the abstract.
+- **`escalation.kill_switch`**: every Card built by `card export` sets `kill_switch.available: true` with a fixed mechanism description (revoke by invalidating the Card file; the gate fails closed on an invalid/missing Card at startup — see F3). A Card with `kill_switch.available: false` only exists as a deliberately crafted lint fixture (`fixtures/cards/high-no-killswitch.card.json`), never as CLI output.
+- **`cards/` at the repository root ships pre-exported, committed Cards** for both example Declarations (not just `fixtures/`). This is necessary for §10 probes that reference `cards/<id>.card.json` directly against a fresh clone without first running `card export` (e.g. C22's literal probe text). The demo pipeline (F9) additionally exports its own fresh copies under `out/demo/` on every run, so the committed `cards/` files are a stable, human-reviewable reference copy, not something the pipeline depends on being pre-existing.
+- **Card lint (`policy/card.rego`) takes the Card directly as `input`**, not wrapped in an envelope — unlike the gate's `{card, call, context}` input shape (F3), because lint has only one document to reason about.
 
 ## F3 · Gate
 

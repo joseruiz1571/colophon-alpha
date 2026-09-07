@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colophon.example/schemas/agent-card.schema.json",
+  "title": "Colophon Agent Card",
+  "description": "The portable, signable export of a Declaration. What the gate reads. See SPEC.md F2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "spec_version",
+    "card_type",
+    "metadata",
+    "classification",
+    "autonomy",
+    "tools",
+    "sandbox",
+    "decision_boundaries",
+    "escalation",
+    "governance",
+    "evidence"
+  ],
+  "properties": {
+    "spec_version": { "type": "string", "const": "1.0.0" },
+    "card_type": { "type": "string", "const": "agent" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "owner", "created_at", "canonical_sha256"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID v4, copied from the source Declaration's id.",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "created_at": { "type": "string", "format": "date-time" },
+        "canonical_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 of this Card's RFC 8785 canonical form with this field itself excluded."
+        }
+      }
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["risk_tier", "next_review"],
+      "properties": {
+        "risk_tier": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "next_review": { "type": "string", "format": "date" }
+      }
+    },
+    "autonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["assistive", "supervised", "delegated", "autonomous_bounded", "autonomous"]
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "data_access", "data_classes", "requires_approval"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "data_access": { "type": "string", "enum": ["read", "write", "none"] },
+          "data_classes": { "type": "array", "items": { "type": "string" } },
+          "requires_approval": { "type": "boolean" },
+          "max_scopes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "sandbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["write_paths"],
+      "properties": {
+        "write_paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "decision_boundaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "description"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["tool_scope", "data_class", "sandbox_path", "credential_scope"]
+          },
+          "description": { "type": "string", "minLength": 1 },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "escalation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kill_switch"],
+      "properties": {
+        "kill_switch": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available"],
+          "properties": {
+            "available": { "type": "boolean" },
+            "mechanism": { "type": "string" }
+          }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["control_mappings"],
+      "properties": {
+        "control_mappings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["framework", "ref"],
+            "properties": {
+              "framework": { "type": "string", "minLength": 1 },
+              "ref": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
