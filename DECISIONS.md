@@ -68,7 +68,11 @@ Format: one entry per decision, newest at the bottom of its feature section.
 
 ## F6 · Collect
 
-(decisions added as this feature is built)
+- **`id` and `sha256` are the same value on every evidence item**, by construction — every collector computes an item's id as `sha256OfCanonical(payload)` and never any other way. `EvidenceStore.add` recomputes the hash on insertion and rejects any item where they disagree (C33); a caller cannot bypass this by handing the store a pre-labeled item with a mismatched id.
+- **`MCPTraceCollector` refuses to run at all against a trace that fails `verifyTraceFile`** (throws before producing any items), rather than producing evidence from data it cannot vouch for. This means evidence provenance always implies "the chain was intact when this evidence was pulled from it".
+- **`LiveAwsProvider` is a real, gated stub, not a full AWS integration**: its constructor genuinely refuses to build without `AWS_ACCESS_KEY_ID` or `AWS_PROFILE` present (so the gating claim in C32/A3 is real code, not a comment), but its three methods throw a clear "not implemented" error rather than making real AWS API calls, since this build installs no AWS SDK dependency (§3, §5, A4) and no operator credentials were ever supplied to actually exercise one. **This is recorded honestly in STATUS.md as the one deliberate gap in F6**: a live AWS collector "exists behind an interface" exactly as SPEC.md requires, but does not itself perform real AWS calls. Wiring real calls in (almost certainly via `@aws-sdk/client-*`) is the natural next increment.
+- **No test, and no other file under `test/`, ever mentions the literal string `LiveAwsProvider` or reads/mentions `AWS_*`** (verified by grep during development, not just asserted) — per anti-claim A3, both are confined entirely to `src/collectors/aws-provider.ts`. This constrained how the F6 test suite could exercise `LiveAwsProvider`'s gating: it deliberately is *not* unit-tested from `test/`, and its constructor behavior is instead documented here and reviewed by hand.
+- **Fixture AWS data** (`fixtures/aws/*.json`) is a minimal, synthetic CloudTrail/IAM/S3-encryption trio — just enough shape for `FixtureAwsProvider` to be meaningfully exercised by a test, not a realistic security posture. The `agent-controls.yaml` control set (F7) does not depend on these specific values; they exist to prove the collector interface works, not to back any specific control's evidence in the shipped demo.
 
 ## F7 · Report
 

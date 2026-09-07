@@ -1,0 +1,7 @@
+{
+  "colophon-demo-bucket": {
+    "ServerSideEncryptionConfiguration": {
+      "Rules": [{ "ApplyServerSideEncryptionByDefault": { "SSEAlgorithm": "aws:kms" } }]
+    }
+  }
+}

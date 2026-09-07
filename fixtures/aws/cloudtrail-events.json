@@ -1,0 +1,14 @@
+[
+  {
+    "eventName": "AssumeRole",
+    "eventTime": "2026-08-01T12:00:00Z",
+    "userIdentity": { "type": "AssumedRole", "arn": "arn:aws:sts::123456789012:assumed-role/colophon-demo-role/session" },
+    "sourceIPAddress": "203.0.113.10"
+  },
+  {
+    "eventName": "GetObject",
+    "eventTime": "2026-08-01T12:00:05Z",
+    "userIdentity": { "type": "AssumedRole", "arn": "arn:aws:sts::123456789012:assumed-role/colophon-demo-role/session" },
+    "requestParameters": { "bucketName": "colophon-demo-bucket", "key": "reports/example.json" }
+  }
+]
