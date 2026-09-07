@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  # keyless Cosign signing needs an OIDC token from GitHub's own issuer.
+  id-token: write
+
+env:
+  OPA_VERSION: "1.4.2"
+  GITLEAKS_VERSION: "8.21.2"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2"
+
+      - name: Set up OPA
+        run: |
+          curl -sSL -o /usr/local/bin/opa \
+            "https://github.com/open-policy-agent/opa/releases/download/v${OPA_VERSION}/opa_linux_amd64_static"
+          chmod +x /usr/local/bin/opa
+          opa version
+
+      - name: Set up Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Set up gitleaks
+        run: |
+          curl -sSL -o /tmp/gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      # ---- 1. install ----
+      - name: install
+        run: bun install
+
+      # ---- 2. typecheck ----
+      - name: typecheck
+        run: bun run typecheck
+
+      # ---- 3. bun test ----
+      - name: bun test
+        run: bun test
+
+      # ---- 4. opa test ----
+      - name: opa test
+        run: opa test policy/ -v
+
+      # ---- 5. opa fmt --diff ----
+      - name: opa fmt --diff
+        run: opa fmt --diff policy/
+
+      # ---- 6. schema validation of all shipped Declarations and Cards ----
+      - name: schema validation of all shipped Declarations and Cards
+        run: |
+          set -euo pipefail
+          for f in inventory/agents/*.yaml; do
+            echo "validating $f"
+            bun run colophon declare validate "$f"
+          done
+          for f in cards/*.card.json; do
+            echo "validating $f"
+            bun run colophon card validate "$f"
+          done
+
+      # ---- 7. bun run demo (network disabled) ----
+      - name: bun run demo
+        run: |
+          set -euo pipefail
+          sudo iptables -I OUTPUT -o lo -j ACCEPT
+          sudo iptables -I OUTPUT -j REJECT
+          time bun run demo
+          sudo iptables -F OUTPUT
+
+      # ---- 8. colophon bundle verify ----
+      - name: colophon bundle verify
+        run: |
+          set -euo pipefail
+          # out/demo/<runId>/ also holds cards/ and keys/ scratch directories
+          # from earlier demo stages (SPEC.md A5 allows them under out/); only
+          # {compliant-run,evidence-report,approval-flow}/ are real bundles.
+          for name in compliant-run evidence-report approval-flow; do
+            dir=$(ls -d out/demo/*/"$name" | head -1)
+            echo "verifying $dir"
+            bun run colophon bundle verify "$dir"
+          done
+
+      # ---- 9. keyless Cosign sign and verify ----
+      - name: keyless Cosign sign and verify
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          dir=$(ls -d out/demo/*/evidence-report | head -1)
+          manifest="$dir/manifest.json"
+          keyless_bundle="$dir/manifest.json.keyless.sig"
+          cosign sign-blob --yes --bundle "$keyless_bundle" "$manifest"
+          cosign verify-blob \
+            --bundle "$keyless_bundle" \
+            --certificate-identity-regexp "^https://github.com/${GITHUB_REPOSITORY}/" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$manifest"
+
+      # ---- 10. secret scan ----
+      - name: secret scan
+        run: gitleaks detect --no-git -v --source .
