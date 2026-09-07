@@ -23,8 +23,15 @@ tools:
     data_classes: [repo_metadata]
     requires_approval: false
   - name: repo.read_settings
+    # Scoped to the two in-scope repositories only. A call to this tool
+    # naming a repo outside this list (e.g. colophon-demo-c) fails the
+    # gate's GATE-DATA-CLASS-VIOLATION rule — see DECISIONS.md, F3.
     data_access: read
-    data_classes: [repo_metadata, branch_protection]
+    data_classes:
+      - "repo_metadata:colophon-demo-a"
+      - "repo_metadata:colophon-demo-b"
+      - "branch_protection:colophon-demo-a"
+      - "branch_protection:colophon-demo-b"
     requires_approval: false
   - name: fs.read
     data_access: read

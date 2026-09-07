@@ -5,8 +5,8 @@
     "id": "3f2a9e10-6b7a-4b1a-9c9e-2b6a7f4d1a01",
     "name": "evidence-collector",
     "owner": "grc-engineering@example",
-    "created_at": "2026-09-07T20:55:13.814Z",
-    "canonical_sha256": "430ebaaea9098f466b19af7f0750f96d4f1da768859fe6fbcfdf78813f1ebf92"
+    "created_at": "2026-09-07T21:02:56.140Z",
+    "canonical_sha256": "0138d1361a98429a0fc6d23424f7385240d5720ca18ab4e3dd5b24c6260bcfc2"
   },
   "classification": {
     "risk_tier": "high",
@@ -28,8 +28,10 @@
       "name": "repo.read_settings",
       "data_access": "read",
       "data_classes": [
-        "repo_metadata",
-        "branch_protection"
+        "repo_metadata:colophon-demo-a",
+        "repo_metadata:colophon-demo-b",
+        "branch_protection:colophon-demo-a",
+        "branch_protection:colophon-demo-b"
       ],
       "requires_approval": false
     },
@@ -60,7 +62,11 @@
     },
     {
       "type": "data_class",
-      "description": "may touch data class 'branch_protection'"
+      "description": "may touch data class 'branch_protection:colophon-demo-a'"
+    },
+    {
+      "type": "data_class",
+      "description": "may touch data class 'branch_protection:colophon-demo-b'"
     },
     {
       "type": "data_class",
@@ -69,6 +75,14 @@
     {
       "type": "data_class",
       "description": "may touch data class 'repo_metadata'"
+    },
+    {
+      "type": "data_class",
+      "description": "may touch data class 'repo_metadata:colophon-demo-a'"
+    },
+    {
+      "type": "data_class",
+      "description": "may touch data class 'repo_metadata:colophon-demo-b'"
     },
     {
       "type": "sandbox_path",
