@@ -1,3 +1,5 @@
+> This repository is one of two independent builds against an identical spec, kept as a record of that experiment. The current build, which renames the Agent Card to a Record and moves to OSCAL 1.2.3, is [`colophon`](https://github.com/joseruiz1571/colophon). This repository is not maintained.
+
 # Colophon
 
 > A colophon is the statement at the back of a book that records who made it, where, and how. This is that statement for AI agents: a signed, machine-readable record of what an agent was allowed to do, what it tried to do, what it was refused, and the evidence behind each of those facts.
